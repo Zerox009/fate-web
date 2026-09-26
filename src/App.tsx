@@ -7,5 +7,19 @@ import Team from '@/components/Team';
 import Footer from '@/components/Footer';
 
 export default function App() {
-  return <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-white selection:text-black"><Navbar /><main><Hero /><Features /><Modules /><Commands /><Team /></main><Footer /></div>;
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-white selection:text-black">
+      <Navbar />
+
+      <main>
+        <Hero />
+        <Features />
+        <Modules />
+        <Commands />
+        <Team />
+      </main>
+
+      <Footer />
+    </div>
+  );
 }
