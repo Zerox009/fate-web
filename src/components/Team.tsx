@@ -1,91 +1,103 @@
 import {
-  Code2,
-  Crown,
   ExternalLink,
-  Loader2,
+  Crown,
+  Code2,
 } from 'lucide-react';
 
 import {
-  getActivity,
+  useLanyard,
   getAvatarUrl,
   getStatusColor,
   getStatusLabel,
-  useLanyard,
-} from '@/hooks/useLanyard';
+  getActivity,
+} from '../hooks/useLanyard';
 
-import { team } from '@/data/content';
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  avatar?: string;
+  banner?: string;
+}
 
-const roleIcon: Record<string, React.ReactNode> = {
-  'Lead Developer': (
-    <Code2 className="h-4 w-4" />
-  ),
+interface TeamProps {
+  members: TeamMember[];
+}
 
-  Owner: (
-    <Crown className="h-4 w-4" />
-  ),
-};
-
-function TeamCard({
-  member,
-}: {
-  member: (typeof team)[number];
-}) {
+function TeamCard({ member }: { member: TeamMember }) {
   const {
     data,
     loading,
     error,
   } = useLanyard(member.id);
 
+  const discordUser = data?.discord_user;
+
+  const displayName =
+    discordUser?.global_name ||
+    discordUser?.username ||
+    member.name;
+
+  const username = discordUser?.username
+    ? `@${discordUser.username}`
+    : `@${member.name.toLowerCase().replace(/\s+/g, '')}`;
+
+  const avatar =
+    discordUser
+      ? getAvatarUrl(discordUser)
+      : member.avatar;
+
   const status =
-    data?.discord_status ?? 'offline';
+    data?.discord_status || 'offline';
 
   const activity = getActivity(data);
 
-  const displayName =
-    data?.discord_user.global_name ||
-    data?.discord_user.username ||
-    member.name;
-
-  const username =
-    data?.discord_user.username
-      ? `@${data.discord_user.username}`
-      : `@${member.name.toLowerCase().replace(/\s+/g, '')}`;
-
-  const avatar = data
-    ? getAvatarUrl(data.discord_user)
-    : member.avatar;
-
   return (
-    <article className="group overflow-hidden rounded-xl border border-white/10 bg-[#151515] transition hover:-translate-y-1 hover:border-[#dfcabb]/40">
-      <div className="relative h-32 overflow-hidden bg-[#242424]">
-        {member.banner ? (
+    <article className="group relative overflow-hidden rounded-xl border border-white/10 bg-[#151515] transition-all duration-300 hover:border-white/20">
+      <div className="relative h-24 overflow-hidden bg-gradient-to-br from-zinc-800 via-zinc-900 to-black">
+        {member.banner && (
           <img
             src={member.banner}
             alt=""
-            className="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-cover opacity-60"
           />
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-[#302a26] via-[#1c1c1c] to-[#101010]" />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#151515] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#151515]" />
+      </div>
 
-        <div className="absolute bottom-0 left-5 translate-y-1/2">
+      <div className="relative px-4 pb-5">
+        <div className="-mt-10 flex items-end justify-between">
           <div className="relative">
-            {loading ? (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-[#151515] bg-[#252525]">
-                <Loader2 className="h-5 w-5 animate-spin text-white/40" />
-              </div>
-            ) : (
-              <img
-                src={avatar}
-                alt={displayName}
-                className="h-20 w-20 rounded-full border-4 border-[#151515] bg-[#222] object-cover"
-              />
-            )}
+            <div className="h-[76px] w-[76px] overflow-hidden rounded-full border-[4px] border-[#151515] bg-zinc-800 shadow-lg">
+              {avatar ? (
+                <img
+                  src={avatar}
+                  alt={displayName}
+                  className="block h-full w-full object-cover"
+                  onError={(event) => {
+                    const image =
+                      event.currentTarget;
+
+                    if (
+                      image.src !==
+                      'https://cdn.discordapp.com/embed/avatars/0.png'
+                    ) {
+                      image.src =
+                        'https://cdn.discordapp.com/embed/avatars/0.png';
+                    }
+                  }}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-white">
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
 
             <span
-              className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-4 border-[#151515]"
+              className="absolute bottom-1 right-1 h-[18px] w-[18px] rounded-full border-[4px] border-[#151515]"
               style={{
                 backgroundColor:
                   getStatusColor(status),
@@ -93,95 +105,109 @@ function TeamCard({
               title={getStatusLabel(status)}
             />
           </div>
-        </div>
-      </div>
-
-      <div className="px-5 pb-5 pt-12">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h3 className="truncate text-lg font-bold text-white">
-              {displayName}
-            </h3>
-
-            <p className="mt-0.5 truncate text-xs text-white/40">
-              {username}
-            </p>
-          </div>
 
           <a
             href={`https://discord.com/users/${member.id}`}
             target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-md border border-white/10 p-2 text-white/40 transition hover:border-white/20 hover:text-white"
+            rel="noreferrer"
+            className="mb-1 flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-zinc-400 transition hover:border-white/20 hover:text-white"
             aria-label={`Open ${displayName}'s Discord profile`}
           >
-            <ExternalLink className="h-4 w-4" />
+            <ExternalLink size={15} />
           </a>
         </div>
 
-        <div className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1.5">
-          <span
-            className="h-2 w-2 rounded-full"
-            style={{
-              backgroundColor:
-                getStatusColor(status),
-            }}
-          />
+        <div className="mt-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-white">
+              {displayName}
+            </h3>
+          </div>
 
-          <span className="text-xs text-white/65">
-            {getStatusLabel(status)}
-          </span>
+          <p className="mt-0.5 text-xs text-zinc-500">
+            {username}
+          </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-[#1b1b1b] px-2.5 py-1 text-xs text-zinc-300">
+              {member.role.toLowerCase().includes('owner') ? (
+                <Crown size={12} />
+              ) : (
+                <Code2 size={12} />
+              )}
+
+              {member.role}
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-[#1b1b1b] px-2.5 py-1 text-xs text-zinc-300">
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{
+                  backgroundColor:
+                    getStatusColor(status),
+                }}
+              />
+
+              {getStatusLabel(status)}
+            </span>
+          </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-1.5 text-xs text-[#dfcabb]">
-          {roleIcon[member.role]}
-          {member.role}
-        </div>
-
-        <p className="mt-4 text-sm leading-6 text-[#a99b90]">
+        <p className="mt-4 text-sm leading-6 text-zinc-400">
           {member.bio}
         </p>
 
-        {activity && (
-          <div className="mt-5 rounded-lg border border-white/10 bg-[#101010] p-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#8f837a]">
-              {activity.label}
-            </p>
-
-            <p className="mt-1 truncate text-sm font-semibold text-white">
-              {activity.value}
-            </p>
+        {loading && !data && (
+          <div className="mt-4 rounded-lg border border-white/10 bg-[#101010] px-3 py-3">
+            <div className="h-2 w-20 animate-pulse rounded bg-zinc-800" />
+            <div className="mt-2 h-3 w-32 animate-pulse rounded bg-zinc-800" />
           </div>
         )}
 
-        {data?.listening_to_spotify &&
-          data.spotify && (
-            <div className="mt-3 flex items-center gap-3 rounded-lg border border-white/10 bg-[#101010] p-3">
-              <img
-                src={data.spotify.album_art_url}
-                alt=""
-                className="h-10 w-10 rounded-md object-cover"
-              />
+        {activity && (
+          <div className="mt-4 overflow-hidden rounded-lg border border-white/10 bg-[#101010]">
+            <div className="flex gap-3 p-3">
+              {activity.assets?.large_image && (
+                <ActivityImage
+                  image={activity.assets.large_image}
+                  applicationId={
+                    data?.activities.find(
+                      (item) =>
+                        item.name === activity.value
+                    )?.application_id
+                  }
+                  alt={activity.value}
+                />
+              )}
 
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#8f837a]">
-                  Listening to Spotify
+              <div className="min-w-0 flex-1">
+                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                  {activity.label}
                 </p>
 
-                <p className="truncate text-sm font-semibold text-white">
-                  {data.spotify.song}
+                <p className="mt-0.5 truncate text-sm font-semibold text-white">
+                  {activity.value}
                 </p>
 
-                <p className="truncate text-xs text-white/40">
-                  {data.spotify.artist}
-                </p>
+                {activity.details && (
+                  <p className="mt-0.5 truncate text-xs text-zinc-400">
+                    {activity.details}
+                  </p>
+                )}
+
+                {activity.state && (
+                  <p className="truncate text-xs text-zinc-500">
+                    {activity.state}
+                  </p>
+                )}
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-        {error && (
-          <p className="mt-4 text-xs text-white/30">
-            Discord presence is currently unavailable.
+        {!loading && error && (
+          <p className="mt-3 text-xs text-zinc-600">
+            Discord presence unavailable
           </p>
         )}
       </div>
@@ -189,24 +215,58 @@ function TeamCard({
   );
 }
 
-export default function Team() {
-  return (
-    <section
-      id="team"
-      className="px-6 py-24"
-    >
-      <div className="mx-auto max-w-[1110px]">
-        <h2 className="text-4xl font-extrabold tracking-[-0.04em] text-white sm:text-5xl">
-          The people behind Fate.
-        </h2>
+function ActivityImage({
+  image,
+  applicationId,
+  alt,
+}: {
+  image: string;
+  applicationId?: string;
+  alt: string;
+}) {
+  let src = image;
 
-        <p className="mt-5 max-w-2xl text-lg leading-8 text-[#a99b90]">
-          See who is behind the project and whether they are around on
-          Discord right now.
+  if (image.startsWith('mp:external/')) {
+    src = `https://media.discordapp.net/${image.replace(
+      'mp:external/',
+      ''
+    )}`;
+  } else if (
+    image.startsWith('spotify:')
+  ) {
+    src = `https://i.scdn.co/image/${image.replace(
+      'spotify:',
+      ''
+    )}`;
+  } else if (applicationId) {
+    src = `https://cdn.discordapp.com/app-assets/${applicationId}/${image}.png?size=128`;
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className="h-12 w-12 shrink-0 rounded-md object-cover"
+      onError={(event) => {
+        event.currentTarget.style.display = 'none';
+      }}
+    />
+  );
+}
+
+export default function Team({
+  members,
+}: TeamProps) {
+  return (
+    <section className="py-20">
+      <div className="mx-auto max-w-6xl px-6">
+        <p className="mb-8 text-sm text-zinc-400">
+          See who is behind the project and whether
+          they are around on Discord right now.
         </p>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {team.map((member) => (
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {members.map((member) => (
             <TeamCard
               key={member.id}
               member={member}
