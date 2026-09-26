@@ -59,19 +59,14 @@ export default function Commands() {
       <div className="mx-auto max-w-[1110px]">
         <div className="flex flex-col justify-between gap-5 border-b border-white/10 pb-8 lg:flex-row lg:items-end">
           <div>
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.13em] text-[#9c8c80]">
-              The command shelf
-            </p>
-
             <h2 className="text-4xl font-extrabold tracking-[-0.04em] text-white sm:text-5xl">
-              Everything Fate can do.
+              Every command that ships with Fate.
             </h2>
           </div>
 
           <p className="max-w-md text-base leading-7 text-[#a99b90]">
-            Browse the commands that are available to regular servers.
-            Search by command, alias, category, or what a command actually
-            does.
+            Browse the commands available to regular servers. Search by
+            command, alias, category, or what a command actually does.
           </p>
         </div>
 
@@ -117,11 +112,9 @@ export default function Commands() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <code className="break-all text-sm font-bold text-white">
-                      {command.name}
-                    </code>
-                  </div>
+                  <code className="break-all text-sm font-bold text-white">
+                    {command.name}
+                  </code>
 
                   <p className="mt-1 text-sm leading-6 text-[#a99b90]">
                     {command.description}
@@ -174,17 +167,14 @@ export default function Commands() {
             </p>
 
             <p className="mt-2 text-sm text-white/45">
-              Try another command, alias, or category.
+              Try a shorter command name or switch back to All.
             </p>
           </div>
         )}
 
         <div className="mt-8 flex items-center gap-2 text-xs text-[#7f746c]">
           <Terminal className="h-4 w-4" />
-
-          <span>
-            Public command details are taken from the current Fate source.
-          </span>
+          Command details are taken from the current Fate source tree.
         </div>
       </div>
     </section>
