@@ -21,16 +21,33 @@ interface TeamMember {
   banner?: string;
 }
 
-interface TeamProps {
-  members: TeamMember[];
-}
+const members: TeamMember[] = [
+  {
+    id: '1336664274969296977',
+    name: 'Const',
+    role: 'Lead Developer',
+    bio: 'Keeps the core code moving and turns rough ideas into features that are actually pleasant to use.',
+  },
+  {
+    id: '1379844667792949421',
+    name: 't3xture',
+    role: 'Owner',
+    bio: 'Looks after the direction of the project, the community around it, and the bigger decisions behind the scenes.',
+  },
+  {
+    id: '1014833598303576115',
+    name: 'Himanshu',
+    role: 'Owner',
+    bio: 'Helps keep the day-to-day side of the project moving while working on what comes next.',
+  },
+];
 
 function TeamCard({ member }: { member: TeamMember }) {
   const { data, loading } = useLanyard(member.id);
 
   const user = data?.discord_user;
 
-  const name =
+  const displayName =
     user?.global_name ||
     user?.username ||
     member.name;
@@ -51,14 +68,6 @@ function TeamCard({ member }: { member: TeamMember }) {
     <article className="group relative overflow-hidden rounded-xl border border-white/10 bg-[#151515] transition-all duration-300 hover:border-white/20">
 
       <div className="relative h-24 overflow-hidden bg-gradient-to-br from-zinc-800 via-zinc-900 to-black">
-        {member.banner && (
-          <img
-            src={member.banner}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover opacity-60"
-          />
-        )}
-
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#151515]" />
       </div>
 
@@ -68,17 +77,19 @@ function TeamCard({ member }: { member: TeamMember }) {
 
           <div className="relative">
 
-            <div className="h-[76px] w-[76px] rounded-full border-[4px] border-[#151515] bg-zinc-800 shadow-lg">
+            <div className="h-[76px] w-[76px] overflow-hidden rounded-full border-[4px] border-[#151515] bg-zinc-800 shadow-lg">
+
               <img
                 src={avatar}
-                alt={name}
-                className="h-full w-full rounded-full object-cover"
+                alt={displayName}
+                className="block h-full w-full rounded-full object-cover"
                 loading="lazy"
                 onError={(event) => {
                   event.currentTarget.src =
                     'https://cdn.discordapp.com/embed/avatars/0.png';
                 }}
               />
+
             </div>
 
             <span
@@ -96,6 +107,7 @@ function TeamCard({ member }: { member: TeamMember }) {
             target="_blank"
             rel="noreferrer"
             className="mb-1 flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-zinc-400 transition hover:border-white/20 hover:text-white"
+            aria-label={`Open ${displayName}'s Discord profile`}
           >
             <ExternalLink size={15} />
           </a>
@@ -105,16 +117,17 @@ function TeamCard({ member }: { member: TeamMember }) {
         <div className="mt-4">
 
           <h3 className="text-base font-semibold text-white">
-            {name}
+            {displayName}
           </h3>
 
           <p className="mt-0.5 text-xs text-zinc-500">
             {username}
           </p>
 
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
 
             <span className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-[#1b1b1b] px-2.5 py-1 text-xs text-zinc-300">
+
               {member.role.toLowerCase().includes('owner') ? (
                 <Crown size={12} />
               ) : (
@@ -122,6 +135,7 @@ function TeamCard({ member }: { member: TeamMember }) {
               )}
 
               {member.role}
+
             </span>
 
             <span className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-[#1b1b1b] px-2.5 py-1 text-xs text-zinc-300">
@@ -147,7 +161,7 @@ function TeamCard({ member }: { member: TeamMember }) {
         </p>
 
         {loading && (
-          <div className="mt-4 rounded-lg border border-white/10 bg-[#101010] p-3">
+          <div className="mt-4 rounded-lg border border-white/10 bg-[#101010] px-3 py-3">
             <div className="h-2 w-20 animate-pulse rounded bg-zinc-800" />
             <div className="mt-2 h-3 w-32 animate-pulse rounded bg-zinc-800" />
           </div>
@@ -161,7 +175,12 @@ function TeamCard({ member }: { member: TeamMember }) {
               {activity.assets?.large_image && (
                 <ActivityImage
                   image={activity.assets.large_image}
-                  applicationId={activity.applicationId}
+                  applicationId={
+                    data?.activities.find(
+                      (item) =>
+                        item.name === activity.value
+                    )?.application_id
+                  }
                   alt={activity.value}
                 />
               )}
@@ -243,9 +262,7 @@ function ActivityImage({
   );
 }
 
-export default function Team({
-  members,
-}: TeamProps) {
+export default function Team() {
   return (
     <section className="py-20">
       <div className="mx-auto max-w-6xl px-6">
